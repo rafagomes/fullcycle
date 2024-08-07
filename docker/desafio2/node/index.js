@@ -11,6 +11,9 @@ const config = {
 const mysql = require("mysql2");
 const connection = mysql.createConnection(config);
 
+const sqlCreateTable = `CREATE TABLE IF NOT EXISTS people (id int auto_increment, name varchar(255), primary key(id))`;
+connection.query(sqlCreateTable);
+
 const sql = 'INSERT INTO people(name) values("Rafa")';
 connection.query(sql);
 connection.end();
