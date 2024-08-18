@@ -1,4 +1,4 @@
-module server
+module pos
 
 go 1.22.5
 

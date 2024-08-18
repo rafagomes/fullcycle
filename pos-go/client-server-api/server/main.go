@@ -43,7 +43,7 @@ func main() {
 	db = sqliteDb
 	initDb()
 	defer db.Close()
-	http.HandleFunc("/", getDollarRate)
+	http.HandleFunc("/cotacao", getDollarRate)
 	fmt.Println("Server running on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
