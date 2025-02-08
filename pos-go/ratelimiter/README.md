@@ -11,9 +11,7 @@ com base em endereço IP ou token de acesso. Este projeto utiliza Redis para per
 - [Uso](#uso)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Testes](#testes)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
-- [Contato](#contato)
+- [Casos de Uso e Exemplos de Chamadas para Validação](#casos-de-uso-e-exemplos-de-chamadas-para-validação)
 
 ## Visão Geral
 Este projeto implementa um middleware de rate limiting para aplicações web em Go. A aplicação controla o tráfego de requisições utilizando dois critérios:
