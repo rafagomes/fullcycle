@@ -39,7 +39,7 @@ As configurações de limite e bloqueio são definidas através de variáveis de
 ## Instalação e Configuração
 
 ### Pré-requisitos
-- [Go](https://golang.org/) instalado (versão 1.18 ou superior).
+- [Go](https://golang.org/) instalado (versão 1.23.6 ou superior).
 - [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) instalados.
 
 ### Passos para Instalação
@@ -54,8 +54,8 @@ As configurações de limite e bloqueio são definidas através de variáveis de
      ```dotenv
      RATE_LIMIT_IP=5
      RATE_LIMIT_TOKEN=10
-     BLOCK_TIME_IP=300
-     BLOCK_TIME_TOKEN=300
+     BLOCK_TIME_IP=50
+     BLOCK_TIME_TOKEN=50
      REDIS_ADDR=localhost:6379
      REDIS_PASSWORD=
      REDIS_DB=0
