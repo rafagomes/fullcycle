@@ -1,0 +1,6 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "pos-go/weather-service"
+    args: ["build", "-t", "gcr.io/fullstack-pos/weather-service", "."]
+images:
+  - "gcr.io/fullstack-pos/weather-service"
