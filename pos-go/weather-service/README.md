@@ -37,12 +37,14 @@ pos-go
 ## Setup Instructions
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/microsoft/vscode-remote-try-go.git
    cd pos-go/weather-service
    ```
 
 2. Build the Docker image:
+
    ```
    docker build -t weather-service .
    ```
@@ -55,6 +57,7 @@ pos-go
 ## Usage
 
 Send a GET request to the endpoint with a valid CEP:
+
 ```
 GET /weather?cep=<valid_cep>
 ```
@@ -62,6 +65,7 @@ GET /weather?cep=<valid_cep>
 ### Example Response
 
 On success:
+
 ```
 HTTP/1.1 200 OK
 {
@@ -72,6 +76,7 @@ HTTP/1.1 200 OK
 ```
 
 On invalid CEP format:
+
 ```
 HTTP/1.1 422 Unprocessable Entity
 {
@@ -80,6 +85,7 @@ HTTP/1.1 422 Unprocessable Entity
 ```
 
 On CEP not found:
+
 ```
 HTTP/1.1 404 Not Found
 {
@@ -90,7 +96,3 @@ HTTP/1.1 404 Not Found
 ## Deployment
 
 This application can be deployed on Google Cloud Run. Follow the Google Cloud documentation for deploying Docker containers to Cloud Run.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
