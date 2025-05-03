@@ -1,11 +1,9 @@
-package tests
+package handlers
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"weather-service/handlers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +13,7 @@ func TestHandleWeatherRequest_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 	router.GET("/weather/:cep", func(c *gin.Context) {
-		handlers.HandleWeatherRequest(c.Writer, c.Request)
+		HandleWeatherRequest(c.Writer, c.Request)
 	})
 
 	req, _ := http.NewRequest("GET", "/weather/01001000", nil)
@@ -32,7 +30,7 @@ func TestHandleWeatherRequest_InvalidCEP(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 	router.GET("/weather/:cep", func(c *gin.Context) {
-		handlers.HandleWeatherRequest(c.Writer, c.Request)
+		HandleWeatherRequest(c.Writer, c.Request)
 	})
 
 	req, _ := http.NewRequest("GET", "/weather/1234567", nil)
@@ -47,7 +45,7 @@ func TestHandleWeatherRequest_NotFoundCEP(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 	router.GET("/weather/:cep", func(c *gin.Context) {
-		handlers.HandleWeatherRequest(c.Writer, c.Request)
+		HandleWeatherRequest(c.Writer, c.Request)
 	})
 
 	req, _ := http.NewRequest("GET", "/weather/99999999", nil)

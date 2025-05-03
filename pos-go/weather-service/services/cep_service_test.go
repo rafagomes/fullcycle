@@ -1,10 +1,8 @@
-package tests
+package services
 
 import (
 	"net/http"
 	"testing"
-
-	"weather-service/services"
 )
 
 func TestGetLocationByCEP(t *testing.T) {
@@ -20,7 +18,7 @@ func TestGetLocationByCEP(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.cep, func(t *testing.T) {
-			city, err := services.GetLocationByCEP(test.cep)
+			city, err := GetLocationByCEP(test.cep)
 			if test.expectedCode == http.StatusOK {
 				if err != nil {
 					t.Errorf("Expected no error, got %v", err)
