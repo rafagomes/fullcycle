@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"regexp"
 
 	"weather-service/services"
 )
@@ -15,41 +14,36 @@ type WeatherResponse struct {
 	TempK float64 `json:"temp_K"`
 }
 
+// writeError writes a plain-text body (no trailing newline) with the given status code.
+func writeError(w http.ResponseWriter, code int, msg string) {
+	w.WriteHeader(code)
+	_, _ = w.Write([]byte(msg))
+}
+
 func HandleWeatherRequest(w http.ResponseWriter, r *http.Request) {
-	cep := r.URL.Query().Get("cep")
-
-	if !isValidCEP(cep) {
-		log.Printf("Invalid CEP format: %s", cep)
-		http.Error(w, "invalid zipcode", http.StatusUnprocessableEntity)
-		return
-	}
-
-	city, err := services.GetLocationByCEP(cep)
+	city, err := services.GetLocationByCEP(r.URL.Query().Get("cep"))
 	if err != nil {
-		log.Printf("Failed to find location for CEP %s: %v", cep, err)
-		http.Error(w, "can not find zipcode", http.StatusNotFound)
+		log.Printf("CEP error: %v", err)
+		switch err {
+		case services.ErrInvalidZipcode:
+			writeError(w, http.StatusUnprocessableEntity, err.Error())
+		case services.ErrNotFound:
+			writeError(w, http.StatusNotFound, err.Error())
+		default:
+			writeError(w, http.StatusInternalServerError, "unexpected error")
+		}
 		return
 	}
 
 	tempC, tempF, tempK, err := services.GetWeatherByCity(city)
 	if err != nil {
-		log.Printf("Failed to fetch weather for city %s: %v", city, err)
-		http.Error(w, "could not fetch weather", http.StatusInternalServerError)
+		log.Printf("Weather API error for %q: %v", city, err)
+		writeError(w, http.StatusInternalServerError, "could not fetch weather")
 		return
 	}
 
-	response := WeatherResponse{
-		TempC: tempC,
-		TempF: tempF,
-		TempK: tempK,
-	}
-
-	log.Printf("Successfully fetched weather for city %s: %+v", city, response)
+	resp := WeatherResponse{TempC: tempC, TempF: tempF, TempK: tempK}
+	log.Printf("Weather for %q: %+v", city, resp)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
-}
-
-func isValidCEP(cep string) bool {
-	re := regexp.MustCompile(`^\d{5}-?\d{3}$`)
-	return re.MatchString(cep)
+	_ = json.NewEncoder(w).Encode(resp)
 }

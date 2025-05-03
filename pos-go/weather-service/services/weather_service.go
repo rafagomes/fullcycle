@@ -9,43 +9,31 @@ import (
 
 const weatherAPIURL = "http://api.weatherapi.com/v1/current.json?key=36a78590564d420288411225250305&q="
 
-// WeatherResponse represents the structure of the weather data response
-type WeatherResponse struct {
+type weatherAPIResponse struct {
 	Current struct {
 		TempC float64 `json:"temp_c"`
 	} `json:"current"`
 }
 
-// GetWeatherByCity fetches the current temperature for a given city
-func GetWeatherByCity(city string) (float64, float64, float64, error) {
+func GetWeatherByCity(city string) (c, f, k float64, err error) {
 	resp, err := http.Get(weatherAPIURL + url.QueryEscape(city))
 	if err != nil {
-		return 0, 0, 0, fmt.Errorf("failed to fetch weather data: %v", err)
+		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, 0, 0, fmt.Errorf("failed to get weather data, status code: %d", resp.StatusCode)
+		err = fmt.Errorf("weather API returned %d", resp.StatusCode)
+		return
 	}
 
-	var weatherResponse WeatherResponse
-	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
-		return 0, 0, 0, fmt.Errorf("failed to decode weather response: %v", err)
+	var apiR weatherAPIResponse
+	if err = json.NewDecoder(resp.Body).Decode(&apiR); err != nil {
+		return
 	}
 
-	tempC := weatherResponse.Current.TempC
-	tempF := CelsiusToFahrenheit(tempC)
-	tempK := CelsiusToKelvin(tempC)
-
-	return tempC, tempF, tempK, nil
-}
-
-// CelsiusToFahrenheit converts Celsius to Fahrenheit
-func CelsiusToFahrenheit(celsius float64) float64 {
-	return celsius*1.8 + 32
-}
-
-// CelsiusToKelvin converts Celsius to Kelvin
-func CelsiusToKelvin(celsius float64) float64 {
-	return celsius + 273.15
+	c = apiR.Current.TempC
+	f = c*1.8 + 32
+	k = c + 273.15
+	return
 }

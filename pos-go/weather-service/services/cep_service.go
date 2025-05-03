@@ -5,19 +5,27 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 )
 
 const viaCEPURL = "https://viacep.com.br/ws/%s/json/"
+
+var (
+	ErrInvalidZipcode = errors.New("invalid zipcode")
+	ErrNotFound       = errors.New("cannot find zipcode")
+)
+
+var cepRe = regexp.MustCompile(`^\d{5}-?\d{3}$`)
 
 // Location represents the structure of the location data returned by the viaCEP API.
 type Location struct {
 	City string `json:"localidade"`
 }
 
-// GetLocationByCEP retrieves the city name based on the provided CEP.
+// GetLocationByCEP validates the CEP, calls ViaCEP, and returns either the city or a sentinel error.
 func GetLocationByCEP(cep string) (string, error) {
-	if len(cep) != 8 {
-		return "", errors.New("unprocessable entity: invalid zipcode")
+	if !cepRe.MatchString(cep) {
+		return "", ErrInvalidZipcode
 	}
 
 	resp, err := http.Get(fmt.Sprintf(viaCEPURL, cep))
@@ -27,13 +35,16 @@ func GetLocationByCEP(cep string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "", errors.New("can not find zipcode")
+		return "", ErrNotFound
 	}
 
-	var location Location
-	if err := json.NewDecoder(resp.Body).Decode(&location); err != nil {
+	var loc Location
+	if err := json.NewDecoder(resp.Body).Decode(&loc); err != nil {
 		return "", err
 	}
 
-	return location.City, nil
+	if loc.City == "" {
+		return "", ErrNotFound
+	}
+	return loc.City, nil
 }
