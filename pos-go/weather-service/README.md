@@ -95,4 +95,5 @@ HTTP/1.1 404 Not Found
 
 ## Deployment
 
-This application can be deployed on Google Cloud Run. Follow the Google Cloud documentation for deploying Docker containers to Cloud Run.
+This application was deployed using Google Cloud Run and can be accessed at the following URL:
+[Weather Service on Google Cloud Run](https://weather-service-26048141879.us-central1.run.app/weather?cep=24754210)
