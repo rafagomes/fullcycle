@@ -97,3 +97,28 @@ HTTP/1.1 404 Not Found
 
 This application was deployed using Google Cloud Run and can be accessed at the following URL:
 [Weather Service on Google Cloud Run](https://weather-service-26048141879.us-central1.run.app/weather?cep=24754210)
+
+## Distributed Tracing with OpenTelemetry and Zipkin
+
+This project implements distributed tracing using OpenTelemetry (OTEL) and Zipkin. The tracing is configured to measure the response times of the following services:
+
+1. **CEP Service**: Measures the time taken to fetch location data based on a CEP (ZIP code).
+2. **Weather Service**: Measures the time taken to fetch weather data for a given city.
+
+### Configuration
+
+- **Tracer Initialization**: The tracer is initialized in `main.go` and configured to export spans to a Zipkin server running at `http://localhost:9411`.
+- **Instrumentation**:
+  - `cep_service.go`: Contains spans to measure the response time of the `GetLocationByCEP` function.
+  - `weather_service.go`: Contains spans to measure the response time of the `GetWeatherByCity` function.
+
+### Prerequisites
+
+- Ensure that a Zipkin server is running locally on port 9411.
+- Install the required dependencies listed in `go.mod`.
+
+### Running the Application
+
+1. Start the Zipkin server.
+2. Run the application using `go run main.go`.
+3. Access the Zipkin UI at `http://localhost:9411` to view the traces.
