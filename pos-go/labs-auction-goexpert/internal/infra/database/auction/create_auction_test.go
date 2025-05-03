@@ -2,46 +2,56 @@ package auction
 
 import (
 	"context"
-	"fullcycle-auction_go/internal/entity/auction_entity"
 	"testing"
 	"time"
-
-	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
-func TestAuctionClosureRoutine(t *testing.T) {
-	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	defer mt.Close()
-
+func TestScheduleCloseAuction(t *testing.T) {
 	ctx := context.Background()
-	database := mt.Client.Database("testdb")
-	repo := NewAuctionRepository(database)
 
-	// Insert a mock auction with an expired timestamp
-	expiredAuction := &auction_entity.Auction{
-		Id:          "expired-auction",
-		ProductName: "Test Product",
-		Category:    "Test Category",
-		Description: "Test Description",
-		Condition:   auction_entity.New,
-		Status:      auction_entity.Active,
-		Timestamp:   time.Now().Add(-2 * time.Hour),
+	// Use a short interval so test runs fast
+	repo := &AuctionRepository{
+		interval: 50 * time.Millisecond,
 	}
-	repo.CreateAuction(ctx, expiredAuction)
-
-	// Start the closure routine
-	go startAuctionClosureRoutine(ctx, repo)
-
-	// Wait for the routine to process
-	time.Sleep(3 * time.Second)
-
-	// Verify the auction status is updated to closed
-	updatedAuction, err := repo.FindAuctionById(ctx, "expired-auction")
-	if err != nil {
-		t.Fatalf("Error fetching auction: %v", err)
+	// Capture calls
+	called := make(chan string, 1)
+	repo.closeFunc = func(ctx context.Context, id string) error {
+		called <- id
+		return nil
 	}
 
-	if updatedAuction.Status != auction_entity.Completed {
-		t.Errorf("Expected auction status to be 'Completed', got '%v'", updatedAuction.Status)
+	auctionID := "test-auction-123"
+	repo.scheduleCloseAuction(ctx, auctionID)
+
+	select {
+	case got := <-called:
+		if got != auctionID {
+			t.Errorf("closeFunc called with %q; want %q", got, auctionID)
+		}
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("expected closeFunc to be called, but it wasn't")
+	}
+}
+
+func TestScheduleCloseAuction_CancelledContext(t *testing.T) {
+	// If context is cancelled before interval, closeFunc must NOT be called
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	repo := &AuctionRepository{
+		interval: 50 * time.Millisecond,
+	}
+	called := false
+	repo.closeFunc = func(ctx context.Context, id string) error {
+		called = true
+		return nil
+	}
+
+	repo.scheduleCloseAuction(ctx, "any")
+	cancel() // cancel immediately
+
+	time.Sleep(75 * time.Millisecond)
+	if called {
+		t.Error("closeFunc should not have been called after context cancellation")
 	}
 }
